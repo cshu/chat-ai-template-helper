@@ -71,6 +71,7 @@ for idx, ln in enumerate(slines):
   endidx = idx
 if endidx - begidx > min_num_of_lines_after_strip:
  result = '\n'.join(slines[begidx: endidx])
+input('ENTER to start editing txt')
 Path(txtmiddle).write_text(result)
 editor.append(txtmiddle)
 subprocess.run(editor, check=True)
