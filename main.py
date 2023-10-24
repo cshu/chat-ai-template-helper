@@ -53,6 +53,8 @@ completion = openai.ChatCompletion.create(
  ]
 )
 result = completion.choices[0].message.content# type: ignore
+print(result)
+print('##############')
 
 #print('##############')
 #print(result)
@@ -61,24 +63,41 @@ result = completion.choices[0].message.content# type: ignore
 #print(completion)
 
 #pyperclip.copy(result)
-slines = result.splitlines()
-begidx = 0
-endidx = len(slines)
-for idx, ln in enumerate(slines):
- if (not begidx) and re.match(strip_beg, ln, re.IGNORECASE):
-  begidx = idx+1
- elif re.match(strip_end, ln, re.IGNORECASE):
-  endidx = idx
-if endidx - begidx > min_num_of_lines_after_strip:
- result = '\n'.join(slines[begidx: endidx])
-input('ENTER to start editing txt')
+if strip_beg and strip_end:
+ slines = result.splitlines()
+ begidx = 0
+ endidx = len(slines)
+ for idx, ln in enumerate(slines):
+  if (not begidx) and re.match(strip_beg, ln, re.IGNORECASE):
+   begidx = idx+1
+  elif re.match(strip_end, ln, re.IGNORECASE):
+   endidx = idx
+ if endidx - begidx > min_num_of_lines_after_strip:
+  result = '\n'.join(slines[begidx: endidx])
+
 Path(txtmiddle).write_text(result)
-editor.append(txtmiddle)
-subprocess.run(editor, check=True)
-input('ENTER after you have finished editing the txt')
 
-result=txtbegin+Path(txtmiddle).read_text()+txtend
+#if editor:
+# input('ENTER to start editing txt')
+# editor.append(txtmiddle)
+# subprocess.run(editor, check=True)
+# input('ENTER after you have finished editing the txt')
+#result=Path(txtbegin).read_text()+Path(txtmiddle).read_text()+Path(txtend).read_text()
 
+result=Path(txtbegin).read_text()+result+Path(txtend).read_text()
+
+if editor:
+ Path(docxfile+'.combined.txt').write_text(result)
+ input('ENTER to start editing final txt')
+ #editor.pop()
+ editor.append(docxfile+'.combined.txt')
+ subprocess.run(editor, check=True)
+ input('ENTER after you have finished editing the final txt')
+ result = Path(docxfile+'.combined.txt').read_text()
+
+if docxfile.endswith('.txt'):
+ Path(docxfile).write_text(result)
+ sys.exit(0)
 document = docx.Document(docxfile)
 document.add_paragraph(result)
 document.save(docxfile+'.out.docx')
